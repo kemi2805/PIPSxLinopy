@@ -107,49 +107,49 @@ public:
 
     //Linopy_Init greift auf die Funktionen zu. Auf die oben auch, aber die sind hauptsächlich dafür geschrieben.
     // They get the Pointer. The will then be moved to PIPS
-    double* Get_equality_vector() const;
-    double* Get_equality_linking_vector() const;
-    double* Get_objective_function() const;
+    std::unique_ptr<std::vector<double>> Get_equality_vector() ;
+    std::unique_ptr<std::vector<double>> Get_equality_linking_vector() ;
+    std::unique_ptr<std::vector<double>> Get_objective_function() ;
 
-    double* Get_upper_inequality_constraint_vector() const; // du
-    double* Get_lower_inequality_constraint_vector() const;
-    double* Get_upper_inequality_constraint_linking_vector() const;
-    double* Get_lower_inequality_constraint_linking_vector() const;
+    std::unique_ptr<std::vector<double>> Get_upper_inequality_constraint_vector() ; // du
+    std::unique_ptr<std::vector<double>> Get_lower_inequality_constraint_vector() ;
+    std::unique_ptr<std::vector<double>> Get_upper_inequality_constraint_linking_vector() ;
+    std::unique_ptr<std::vector<double>> Get_lower_inequality_constraint_linking_vector() ;
 
-    double* Get_upper_inequality_constraint_vector_indicator() const; // du
-    double* Get_lower_inequality_constraint_vector_indicator() const;
-    double* Get_upper_inequality_constraint_linking_vector_indicator() const;
-    double* Get_lower_inequality_constraint_linking_vector_indicator() const;
+    std::unique_ptr<std::vector<double>> Get_upper_inequality_constraint_vector_indicator() ; // du
+    std::unique_ptr<std::vector<double>> Get_lower_inequality_constraint_vector_indicator() ;
+    std::unique_ptr<std::vector<double>> Get_upper_inequality_constraint_linking_vector_indicator() ;
+    std::unique_ptr<std::vector<double>> Get_lower_inequality_constraint_linking_vector_indicator() ;
 
-    double* Get_upper_inequality_vector() const;
-    double* Get_lower_inequality_vector() const;
+    std::unique_ptr<std::vector<double>> Get_upper_inequality_vector() ;
+    std::unique_ptr<std::vector<double>> Get_lower_inequality_vector() ;
 
-    double* Get_upper_inequality_vector_indicator() const;
-    double* Get_lower_inequality_vector_indicator() const;
+    std::unique_ptr<std::vector<double>> Get_upper_inequality_vector_indicator() ;
+    std::unique_ptr<std::vector<double>> Get_lower_inequality_vector_indicator() ;
 
-    int* Get_A_row() const;
-    int* Get_A_col() const;
-    double* Get_A_data() const;
+    std::unique_ptr<std::vector<int>> Get_A_row() ;
+    std::unique_ptr<std::vector<int>> Get_A_col() ;
+    std::unique_ptr<std::vector<double>> Get_A_data() ;
 
-    int* Get_B_row() const;
-    int* Get_B_col() const;
-    double* Get_B_data() const;
+    std::unique_ptr<std::vector<int>> Get_B_row() ;
+    std::unique_ptr<std::vector<int>> Get_B_col() ;
+    std::unique_ptr<std::vector<double>> Get_B_data() ;
 
-    int* Get_BL_row() const;
-    int* Get_BL_col() const;
-    double* Get_BL_data() const;
+    std::unique_ptr<std::vector<int>> Get_BL_row() ;
+    std::unique_ptr<std::vector<int>> Get_BL_col() ;
+    std::unique_ptr<std::vector<double>> Get_BL_data() ;
 
-    int* Get_C_row() const;
-    int* Get_C_col() const;
-    double* Get_C_data() const;
+    std::unique_ptr<std::vector<int>> Get_C_row();
+    std::unique_ptr<std::vector<int>> Get_C_col() ;
+    std::unique_ptr<std::vector<double>> Get_C_data() ;
 
-    int* Get_D_row() const;
-    int* Get_D_col() const;
-    double* Get_D_data() const;
+    std::unique_ptr<std::vector<int>> Get_D_row() ;
+    std::unique_ptr<std::vector<int>> Get_D_col() ;
+    std::unique_ptr<std::vector<double>> Get_D_data() ;
 
-    int* Get_DL_row() const;
-    int* Get_DL_col() const;
-    double* Get_DL_data() const;
+    std::unique_ptr<std::vector<int>> Get_DL_row() ;
+    std::unique_ptr<std::vector<int>> Get_DL_col() ;
+    std::unique_ptr<std::vector<double>> Get_DL_data() ;
 
     int* Get_xvec_A();
     int Get_xvec_A_size();

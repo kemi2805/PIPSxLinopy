@@ -8,18 +8,9 @@ Linopy::Linopy(std::string filepath, int local_id, int id_size) {
     Filepath = filepath;
     id = local_id;
     nScenario = id_size;
-    std::cout << "Hier kreieren wir Linopy" << std::endl;
     Set_equality_Vector();
-    std::cout << "Set_equality_vector" << std::endl;
     Set_inequality_Vector();
-    std::cout << "Set_inequality_Vector" << std::endl;
     Set_Matrix();
-    
-    std::cout << "Set_Matrix" << std::endl;
-/*  if((yvec_A->at(0) == yvec_B->at(0)) && (yvec_A->size() == yvec_B->size()))
-        std::cout << "Alles läuft wie geschnitten Brot" << std::endl;
-    if((yvec_C->at(0) == yvec_C->at(0)) && (yvec_D->size() == yvec_B->size()))
-        std::cout << "Alles läuft wie geschnitten Brot" << std::endl;*/
 }
 
 
@@ -28,18 +19,12 @@ Linopy::Linopy(std::string filepath, int local_id, int id_size) {
 //Code for getting the Vectors
 //-------------------------------------
 void Linopy::Set_equality_Vector() {
-    std::cout << "In Set_equality_Vector" << std::endl;
     b = GetDataFromFileEqualityConstraints<double>("b");
-    std::cout << "In Set_equality_Vector_Get_b" << std::endl;
     c = GetDataFromFileEqualityConstraints<double>("c");
-    std::cout << "In Set_equality_Vector_Get_c" << std::endl;
     GetDataForxvec();
-    std::cout << "Hier passiert wohl was, was nicht sollte" <<std::endl;
-    if(nScenario) { // Ich will das bl in Block 0 steht. Für alle anderen Blöcke ist nScenario 0.
-        bl = GetDataFromFileEqualityConstraints<double>("bl",true);
-        std::cout << "In Set_equality_Vector_Get_bl" << std::endl;
+    if(!id) { // Ich will das bl in Block 0 steht. Für alle anderen Blöcke ist nScenario 0.
+        bl = GetDataFromFileEqualityConstraints<double>("b",true);
     }
-    std::cout << "In Set_equality_Vector_at the end" << std::endl;
     return;
 }
 
@@ -49,9 +34,9 @@ void Linopy::Set_inequality_Vector() {
     auto [xu_temp,ixu_temp] = GetDataFromFileInequalityConstraints("xu");
     auto [dl_temp,idl_temp] = GetDataFromFileInequalityConstraints("dl");
     auto [du_temp,idu_temp] = GetDataFromFileInequalityConstraints("du");
-    if(nScenario) {
-        auto [dll_temp,idll_temp] = GetDataFromFileInequalityConstraints("dll",true);
-        auto [dlu_temp,idlu_temp] = GetDataFromFileInequalityConstraints("dlu",true);
+    if(!id) {
+        auto [dll_temp,idll_temp] = GetDataFromFileInequalityConstraints("dl",true);
+        auto [dlu_temp,idlu_temp] = GetDataFromFileInequalityConstraints("du",true);
         dll = std::move(dll_temp); idll = std::move(idll_temp);
         dlu = std::move(dlu_temp); idlu = std::move(idlu_temp);
     }
@@ -63,7 +48,6 @@ void Linopy::Set_inequality_Vector() {
 }
 //-------------------------------------
 
-
 void Linopy::SetPathToFile(int id, std::string name) {
     PathToFile = Filepath;
     PathToFile += "/block";
@@ -72,15 +56,15 @@ void Linopy::SetPathToFile(int id, std::string name) {
     PathToFile += name;
 }
 
-
 std::pair<std::unique_ptr<std::vector<double>>,std::unique_ptr<std::vector<double>>> Linopy::GetDataFromFileInequalityConstraints(std::string name, bool linking) {
     std::vector<double> Temp_Data;
     std::vector<double> Temp_Data_Active;
     std::string Fileline;
     std::ifstream File;
     if(linking)    
-        id = nScenario + 1;
-    SetPathToFile(id, name);
+        SetPathToFile(nScenario+1, name);
+    else
+        SetPathToFile(id, name);  
     File.open(PathToFile);
     while (getline(File,Fileline)) {
         if(Fileline != "inf" && Fileline != "-inf") {
@@ -93,8 +77,6 @@ std::pair<std::unique_ptr<std::vector<double>>,std::unique_ptr<std::vector<doubl
         }
     }
     File.close();
-    if(linking)    
-        id = 0;
     return std::make_pair(std::move(std::make_unique<std::vector<double>>(Temp_Data)),std::move(std::make_unique<std::vector<double>>(Temp_Data_Active)));
 }
 template<typename T>
@@ -103,15 +85,14 @@ std::unique_ptr<std::vector<T>> Linopy::GetDataFromFileEqualityConstraints(std::
     std::string Fileline;
     std::ifstream File;
     if(linking)    
-        id = nScenario + 1; 
-    SetPathToFile(id, name);
+        SetPathToFile(nScenario+1, name);
+    else
+        SetPathToFile(id, name);   
     File.open(PathToFile);
     while (getline(File,Fileline)) {
         Temp_Data.push_back(stod(Fileline));
     }
     File.close();
-    if(linking)    
-        id = 0; 
     return std::move(std::make_unique<std::vector<T>>(Temp_Data));  
 }
 
@@ -243,7 +224,7 @@ void Linopy::SetId(int Id_number) {
 }
 
 int Linopy::Get_n() const {
-    return xvec->size();
+    return c->size();
 }
 
 int Linopy::Get_my() const {
@@ -289,117 +270,120 @@ int Linopy::Get_nnz_DL() const {
 int* Linopy::Get_xvec_A() {
     return xvec->data();
 }
+int Linopy::Get_xvec_A_size() {
+    return xvec->size();
+}
 
 
 
 // Functions Linopy_Init calls
-double* Linopy::Get_equality_vector() const {
-    return b->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_equality_vector() {
+    return std::move((b));
 }
-double* Linopy::Get_equality_linking_vector() const {
-    return bl->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_equality_linking_vector() {
+    return std::move(bl);
 }
-double* Linopy::Get_objective_function() const {
-    return c->data();
-}
-
-double* Linopy::Get_upper_inequality_constraint_vector() const { // du
-    return du->data();
-}
-double* Linopy::Get_lower_inequality_constraint_vector() const {
-    return dl->data();
-}
-double* Linopy::Get_upper_inequality_constraint_linking_vector() const {
-    return dlu->data();
-}
-double* Linopy::Get_lower_inequality_constraint_linking_vector() const {
-    return dll->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_objective_function() {
+    return std::move(c);
 }
 
-double* Linopy::Get_upper_inequality_constraint_vector_indicator() const { // du
-    return idu->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_upper_inequality_constraint_vector() { // du
+    return std::move(du);
 }
-double* Linopy::Get_lower_inequality_constraint_vector_indicator() const {
-    return idl->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_lower_inequality_constraint_vector() {
+    return std::move(dl);
 }
-double* Linopy::Get_upper_inequality_constraint_linking_vector_indicator() const {
-    return idlu->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_upper_inequality_constraint_linking_vector() {
+    return std::move(dlu);
 }
-double* Linopy::Get_lower_inequality_constraint_linking_vector_indicator() const {
-    return idll->data();
-}
-
-double* Linopy::Get_upper_inequality_vector() const {
-    return xu->data();
-}
-double* Linopy::Get_lower_inequality_vector() const {
-    return xl->data();
-}
-double* Linopy::Get_upper_inequality_vector_indicator() const {
-    return ixu->data();
-}
-double* Linopy::Get_lower_inequality_vector_indicator() const {
-    return ixl->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_lower_inequality_constraint_linking_vector() {
+    return std::move(dll);
 }
 
-int* Linopy::Get_A_row() const {
-    return A_row->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_upper_inequality_constraint_vector_indicator() { // du
+    return std::move(idu);
 }
-int* Linopy::Get_A_col() const {
-    return A_col->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_lower_inequality_constraint_vector_indicator() {
+    return std::move(idl);
 }
-double* Linopy::Get_A_data() const {
-    return A_data->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_upper_inequality_constraint_linking_vector_indicator() {
+    return std::move(idlu);
 }
-
-int* Linopy::Get_B_row() const {
-    return B_row->data();
-}
-int* Linopy::Get_B_col() const {
-    return B_col->data();
-}
-double* Linopy::Get_B_data() const {
-    return B_data->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_lower_inequality_constraint_linking_vector_indicator() {
+    return std::move(idll);
 }
 
-int* Linopy::Get_BL_row() const {
-    return BL_row->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_upper_inequality_vector() {
+    return std::move(xu);
 }
-int* Linopy::Get_BL_col() const {
-    return BL_col->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_lower_inequality_vector() {
+    return std::move(xl);
 }
-double* Linopy::Get_BL_data() const {
-    return BL_data->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_upper_inequality_vector_indicator() {
+    return std::move(ixu);
 }
-
-int* Linopy::Get_C_row() const {
-    return C_row->data();
-}
-int* Linopy::Get_C_col() const {
-    return C_col->data();
-}
-double* Linopy::Get_C_data() const {
-    return C_data->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_lower_inequality_vector_indicator() {
+    return std::move(ixl);
 }
 
-int* Linopy::Get_D_row() const {
-    return D_row->data();
+std::unique_ptr<std::vector<int>> Linopy::Get_A_row() {
+    return std::move(A_row);
 }
-int* Linopy::Get_D_col() const {
-    return D_col->data();
+std::unique_ptr<std::vector<int>> Linopy::Get_A_col() {
+    return std::move(A_col);
 }
-double* Linopy::Get_D_data() const {
-    return D_data->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_A_data() {
+    return std::move(A_data);
 }
 
-int* Linopy::Get_DL_row() const {
-    return DL_row->data();
+std::unique_ptr<std::vector<int>> Linopy::Get_B_row() {
+    return std::move(B_row);
 }
-int* Linopy::Get_DL_col() const {
-    return DL_col->data();
+std::unique_ptr<std::vector<int>> Linopy::Get_B_col() {
+    return std::move(B_col);
 }
-double* Linopy::Get_DL_data() const {
-    return DL_data->data();
+std::unique_ptr<std::vector<double>> Linopy::Get_B_data() {
+    return std::move(B_data);
+}
+
+std::unique_ptr<std::vector<int>> Linopy::Get_BL_row() {
+    return std::move(BL_row);
+}
+std::unique_ptr<std::vector<int>> Linopy::Get_BL_col() {
+    return std::move(BL_col);
+}
+std::unique_ptr<std::vector<double>> Linopy::Get_BL_data() {
+    return std::move(BL_data);
+}
+
+std::unique_ptr<std::vector<int>> Linopy::Get_C_row() {
+    return std::move(C_row);
+}
+std::unique_ptr<std::vector<int>> Linopy::Get_C_col() {
+    return std::move(C_col);
+}
+std::unique_ptr<std::vector<double>> Linopy::Get_C_data() {
+    return std::move(C_data);
+}
+
+std::unique_ptr<std::vector<int>> Linopy::Get_D_row() {
+    return std::move(D_row);
+}
+std::unique_ptr<std::vector<int>> Linopy::Get_D_col() {
+    return std::move(D_col);
+}
+std::unique_ptr<std::vector<double>> Linopy::Get_D_data() {
+    return std::move(D_data);
+}
+
+std::unique_ptr<std::vector<int>> Linopy::Get_DL_row() {
+    return std::move(DL_row);
+}
+std::unique_ptr<std::vector<int>> Linopy::Get_DL_col() {
+    return std::move(DL_col);
+}
+std::unique_ptr<std::vector<double>> Linopy::Get_DL_data() {
+    return std::move(DL_data);
 }
 
 void Linopy::Transform_Matrix_Cols() {
@@ -462,11 +446,13 @@ void Linopy::Transform_Matrix_Cols_B(std::vector<int>::iterator Col_begin, std::
 std::unique_ptr<std::vector<int>> Linopy::Transform_Matrix_Rows(std::unique_ptr<std::vector<int>> M_Row) {
     std::vector<int> Temp_Data;
     int temp = 0;
-    Temp_Data.push_back(0);
-    if(M_Row->empty())
+    Temp_Data.push_back(temp);
+    if(M_Row->empty()) {
+        Temp_Data.push_back(0);
         return std::move(std::make_unique<std::vector<int>>(Temp_Data));
+    }
     for(std::vector<int>::iterator it = M_Row->begin() + 1; it != M_Row->end(); it++) {
-        if(*it != *(it+1)) {
+        if(*(it-1) != *it) {
             temp++;
             Temp_Data.push_back(temp);
         }

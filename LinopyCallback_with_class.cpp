@@ -33,48 +33,48 @@ public: //methods
     
 
 
-    std::vector<int*> A_col;
-    std::vector<int*> A_row;
-    std::vector<double*> A_data;
+    std::vector<std::unique_ptr<std::vector<int>>> A_col;
+    std::vector<std::unique_ptr<std::vector<int>>> A_row;
+    std::vector<std::unique_ptr<std::vector<double>>> A_data;
 
-    std::vector<int*> B_col;
-    std::vector<int*> B_row;
-    std::vector<double*> B_data;
+    std::vector<std::unique_ptr<std::vector<int>>> B_col;
+    std::vector<std::unique_ptr<std::vector<int>>> B_row;
+    std::vector<std::unique_ptr<std::vector<double>>> B_data;
 
-    std::vector<int*> BL_col;
-    std::vector<int*> BL_row;
-    std::vector<double*> BL_data;
+    std::vector<std::unique_ptr<std::vector<int>>> BL_col;
+    std::vector<std::unique_ptr<std::vector<int>>> BL_row;
+    std::vector<std::unique_ptr<std::vector<double>>> BL_data;
 
-    std::vector<int*> C_col;
-    std::vector<int*> C_row;
-    std::vector<double*> C_data;
+    std::vector<std::unique_ptr<std::vector<int>>> C_col;
+    std::vector<std::unique_ptr<std::vector<int>>> C_row;
+    std::vector<std::unique_ptr<std::vector<double>>> C_data;
 
-    std::vector<int*> D_col;
-    std::vector<int*> D_row;
-    std::vector<double*> D_data;
+    std::vector<std::unique_ptr<std::vector<int>>> D_col;
+    std::vector<std::unique_ptr<std::vector<int>>> D_row;
+    std::vector<std::unique_ptr<std::vector<double>>> D_data;
 
-    std::vector<int*> DL_col;
-    std::vector<int*> DL_row;
-    std::vector<double*> DL_data;
+    std::vector<std::unique_ptr<std::vector<int>>> DL_col;
+    std::vector<std::unique_ptr<std::vector<int>>> DL_row;
+    std::vector<std::unique_ptr<std::vector<double>>> DL_data;
 
     //Linopy stores the constraints and the objective function in vectors. 
-    std::vector<double*> c;  // Objective function constraints
-    std::vector<double*> b;  // Equality Constraints
-    std::vector<double*> bl; // Equality Linking Constraints
+    std::vector<std::unique_ptr<std::vector<double>>> c;  // Objective function constraints
+    std::vector<std::unique_ptr<std::vector<double>>> b;  // Equality Constraints
+    std::vector<std::unique_ptr<std::vector<double>>> bl; // Equality Linking Constraints
 
-    std::vector<double*> dl; // All kind of inequality Constraints
-    std::vector<double*> idl; //Indikator Vektor für dl. Nicht von linopy, für PIPS
-    std::vector<double*> du;
-    std::vector<double*> idu; //Indikator Vektor für du. Nicht von linopy, für PIPS
-    std::vector<double*> dll;
-    std::vector<double*> idll; //Indikator ...
-    std::vector<double*> dlu;
-    std::vector<double*> idlu; //Indikator ..
+    std::vector<std::unique_ptr<std::vector<double>>> dl; // All kind of inequality Constraints
+    std::vector<std::unique_ptr<std::vector<double>>> idl; //Indikator Vektor für dl. Nicht von linopy, für PIPS
+    std::vector<std::unique_ptr<std::vector<double>>> du;
+    std::vector<std::unique_ptr<std::vector<double>>> idu; //Indikator Vektor für du. Nicht von linopy, für PIPS
+    std::vector<std::unique_ptr<std::vector<double>>> dll;
+    std::vector<std::unique_ptr<std::vector<double>>> idll; //Indikator ...
+    std::vector<std::unique_ptr<std::vector<double>>> dlu;
+    std::vector<std::unique_ptr<std::vector<double>>> idlu; //Indikator ..
 
-    std::vector<double*> xl;
-    std::vector<double*> ixl; //Indikator ...
-    std::vector<double*> xu;
-    std::vector<double*> ixu; //Indikator ...
+    std::vector<std::unique_ptr<std::vector<double>>> xl;
+    std::vector<std::unique_ptr<std::vector<double>>> ixl; //Indikator ...
+    std::vector<std::unique_ptr<std::vector<double>>> xu;
+    std::vector<std::unique_ptr<std::vector<double>>> ixu; //Indikator ...
 
 
     std::vector<int> n;
@@ -102,11 +102,11 @@ public: //methods
         return 0;
     }
     int mylSize(void*, int id, int* nnz) {
-        *nnz = myl.at(id);
+        *nnz = myl.at(0);
         return 0;
     }
     int mzlSize(void*, int id, int* nnz) {
-        *nnz = mzl.at(id);
+        *nnz = mzl.at(0);
         return 0;
     }
     int nnzMatEqStage1(void*, int id, int* nnz) {
@@ -141,63 +141,78 @@ public: //methods
         return 0;
     }
     int vecEqRhs(void*, int id, double* vec, int len) {
-        vec = std::move(b.at(id));
+        for(long unsigned int i = 0; i < b.at(id)->size(); i++ ) 
+            vec[i] = b.at(id)->at(i);
         return 0;
     }
     int vecEqRhsLink(void*, int id, double* vec, int len) {
-        vec = std::move(bl.at(0));
+        for(long unsigned int i = 0; i < bl.at(id)->size(); i++ ) 
+            vec[i] = bl.at(0)->at(i);
         return 0;
     }
     int vecIneqRhs(void*, int id, double* vec, int len) {
-        vec = std::move(du.at(id));
+        for(long unsigned int i = 0; i < du.at(id)->size(); i++ ) 
+            vec[i] = du.at(id)->at(i);        
         return 0;
     }
     int vecIneqRhsActive(void*, int id, double* vec, int len) {
-        vec = std::move(idu.at(id));
+        for(long unsigned int i = 0; i < idu.at(id)->size(); i++ ) 
+            vec[i] = idu.at(id)->at(i);           
         return 0;
     }
     int vecIneqLhs(void*, int id, double* vec, int len) {
-        vec = std::move(dl.at(id));
+        for(long unsigned int i = 0; i < dl.at(id)->size(); i++ ) 
+            vec[i] = dl.at(id)->at(i);   
         return 0;
     }
     int vecIneqLhsActive(void*, int id, double* vec, int len) {
-        vec = std::move(idl.at(id));
+        for(long unsigned int i = 0; i < idl.at(id)->size(); i++ ) 
+            vec[i] = idl.at(id)->at(i);   
         return 0;
     }
     int vecIneqRhsLink(void*, int id, double* vec, int len) {
-        vec = std::move(dlu.at(0));
+        for(long unsigned int i = 0; i < dlu.at(id)->size(); i++ ) 
+            vec[i] = dlu.at(0)->at(i);   
         return 0;
     }
     int vecIneqRhsLinkActive(void*, int id, double* vec, int len) {
-        vec = std::move(idlu.at(0));
+        for(long unsigned int i = 0; i < idlu.at(id)->size(); i++ ) 
+            vec[i] = idlu.at(0)->at(i);           
         return 0;
     }
     int vecIneqLhsLink(void*, int id, double* vec, int len) {
-        vec = std::move(dll.at(id));
+        for(long unsigned int i = 0; i < dll.at(id)->size(); i++ ) 
+            vec[i] = dll.at(0)->at(i);
         return 0;
     }
     int vecIneqLhsLinkActive(void*, int id, double* vec, int len) {
-        vec = std::move(idll.at(id));
+        for(long unsigned int i = 0; i < idll.at(id)->size(); i++ ) 
+            vec[i] = idll.at(0)->at(i);   
         return 0;
     }
     int vecObj(void*, int id, double* vec, int len) {
-        vec = std::move(c.at(id));
+        for(long unsigned int i = 0; i < c.at(id)->size(); i++ ) 
+            vec[i] = c.at(id)->at(i);   
         return 0;
     }
     int vecXlb(void*, int id, double* vec, int len) {
-        vec = std::move(xl.at(id));
+        for(long unsigned int i = 0; i < xl.at(id)->size(); i++ ) 
+            vec[i] = xl.at(id)->at(i);   
         return 0;
     }
     int vecXub(void*, int id, double* vec, int len) {
-        vec = std::move(xu.at(id));
+        for(long unsigned int i = 0; i < xu.at(id)->size(); i++ ) 
+            vec[i] = xu.at(id)->at(i);   
         return 0;
     }
     int vecXlbActive(void*, int id, double* vec, int len) {
-        vec = std::move(ixl.at(id));
+        for(long unsigned int i = 0; i < ixl.at(id)->size(); i++ ) 
+            vec[i] = ixl.at(id)->at(i);   
         return 0;
     }
     int vecXubActive(void*, int id, double* vec, int len) {
-        vec = std::move(ixu.at(id));
+        for(long unsigned int i = 0; i < ixu.at(id)->size(); i++ ) 
+            vec[i] = ixu.at(id)->at(i);   
         return 0;
     }
     int matAllZero(void*, int, int* krowM, int* , double*) {
@@ -206,40 +221,58 @@ public: //methods
         return 0;
     }
     int matEqStage1(void*, int id, int* krowM, int* jcolM, double* M) {
-        krowM = std::move(A_row.at(id));
-        jcolM = std::move(A_col.at(id));
-        M = std::move(A_data.at(id));
+        for(long unsigned int i = 0; i < A_row.at(id)->size(); i++) {
+            krowM[i] = A_row.at(id)->at(i);
+        }
+        for(long unsigned int i = 0; i < A_col.at(id)->size(); i++) {
+            jcolM[i] = A_col.at(id)->at(i);
+            M[i] = A_data.at(id)->at(i);
+        }
         return 0;
     }
     int matIneqLink(void*, int id, int* krowM, int* jcolM, double* M) {
-        krowM = std::move(DL_row.at(id));
-        jcolM = std::move(DL_col.at(id));
-        M = std::move(DL_data.at(id));
+        for(long unsigned int i = 0; i < DL_row.at(id)->size(); i++) 
+            krowM[i] = DL_row.at(id)->at(i);
+        for(long unsigned int i = 0; i < DL_col.at(id)->size(); i++) {
+            jcolM[i] = DL_col.at(id)->at(i);
+            M[i] = DL_data.at(id)->at(i);
+        }
         return 0;
     }
     int matIneqStage1(void*, int id, int* krowM, int* jcolM, double* M) {
-        krowM = std::move(C_row.at(id));
-        jcolM = std::move(C_col.at(id));
-        M = std::move(C_data.at(id));
-        std::cout << "C " <<krowM[5] << std::endl;
+        for(long unsigned int i = 0; i < C_row.at(id)->size(); i++)
+            krowM[i] = C_row.at(id)->at(i);
+        for(long unsigned int i = 0; i < C_col.at(id)->size(); i++) {
+            jcolM[i] = C_col.at(id)->at(i);
+            M[i] = C_data.at(id)->at(i);
+        }
         return 0;
     }
     int matEqStage2(void*, int id, int* krowM, int* jcolM, double* M) {
-        krowM = std::move(B_row.at(id));
-        jcolM = std::move(B_col.at(id));
-        M = std::move(B_data.at(id));
+        for(long unsigned int i = 0; i < B_row.at(id)->size(); i++)
+            krowM[i] = B_row.at(id)->at(i);
+        for(long unsigned int i = 0; i < B_col.at(id)->size(); i++) {
+            jcolM[i] = B_col.at(id)->at(i);
+            M[i] = B_data.at(id)->at(i);
+        }
         return 0;
     }
     int matIneqStage2(void*, int id, int* krowM, int* jcolM, double* M) {
-        krowM = std::move(D_row.at(id));
-        jcolM = std::move(D_col.at(id));
-        M = std::move(D_data.at(id));
+        for(long unsigned int i = 0; i < D_row.at(id)->size(); i++) 
+            krowM[i] = D_row.at(id)->at(i);
+        for(long unsigned int i = 0; i < D_col.at(id)->size(); i++) {
+            jcolM[i] = D_col.at(id)->at(i);
+            M[i] = D_data.at(id)->at(i);
+        }
         return 0;
     }
     int matEqLink(void*, int id, int* krowM, int* jcolM, double* M) {
-        krowM = std::move(BL_row.at(id));
-        jcolM = std::move(BL_col.at(id));
-        M = std::move(BL_data.at(id));
+        for(long unsigned int i = 0; i < BL_row.at(id)->size(); i++) 
+            krowM[i] = BL_row.at(id)->at(i);
+        for(long unsigned int i = 0; i < BL_col.at(id)->size(); i++) {
+            jcolM[i] = BL_col.at(id)->at(i);
+            M[i] = BL_data.at(id)->at(i);
+        }
         return 0;
     }
 
@@ -251,33 +284,38 @@ int main(int argc, char** argv) {
    
     // This has to be the same number as the number of Blocks you put in Linopy.
     // Linopy gives an extra block out. Substract 1 from it.
-    int nScenarios = 5; //Argument aus der Main-Funktion
-
-    // All of these are function pointers. The type of function is defined above.
-    // FNNZ is for a function which returns an integer to PIPS
-    // FVEC is a function which returns an Vector to PIPS
-    // FMAT is a function which returns a Matric to PIPS
-    // All of those values are returned through pointers in the function arguments
+    int nScenarios = 6; //Argument aus der Main-Funktion
 
 
-   //std::cout<< "kommen wir hierhin" << std::endl;
-    //Linopy_Init Model("/home/ken/Desktop/pypsa_with_PIPS/pypsa-model",nScenarios);
-    //std::cout << "Was passiert hier" << std::endl;
-
+    // Hier werden alle Blöcke abgelesen und in Linopy_Storage mit der Klasse Linopy gespeichert und bearbeitet
     std::vector<Linopy> Linopy_Storage;
     for(int i = 0; i <= nScenarios; i++) {
         Linopy_Storage.push_back(Linopy("/home/ken/Desktop/pypsa_with_PIPS/pypsa-model", i, nScenarios));
         std::cout << "Linopy_Storage " << i << " wurde kreirt" << std::endl;
     }
-
     Linopy_Storage.at(0).Transform_Matrix_Cols();
-    std::cout << "Hier wurde Transform_Matrix_Cols ausgeführt" << std::endl;
     for(int i = 1; i <= nScenarios; i++) {
         Linopy_Storage.at(i).Set_xvec_A(Linopy_Storage.at(0).Get_xvec_A(),Linopy_Storage.at(0).Get_xvec_A_size());
         Linopy_Storage.at(i).Transform_Matrix_Cols();
     }
 
+    // Da PIPS mit der entgegennahme sehr strikt war und ich nichts in PIPS verändern wollte und keinem Umweg sah, ist das jetzt mit diesen globalen Variablen gelöst
     for(int i = 0; i <= nScenarios; i++) {
+        myl.push_back(Linopy_Storage.at(0).Get_myl());//Diese beiden mussten außerhalb bestimmt werden. Weil sie nur in Block 0 zu finden sind.
+        mzl.push_back(Linopy_Storage.at(0).Get_mzl());
+    }
+    for(int i = 0; i <= nScenarios; i++) {
+        n.push_back(Linopy_Storage.at(i).Get_n());
+        my.push_back(Linopy_Storage.at(i).Get_my());
+        mz.push_back(Linopy_Storage.at(i).Get_mz());
+
+        nnzA.push_back(Linopy_Storage.at(i).Get_nnz_A());
+        nnzB.push_back(Linopy_Storage.at(i).Get_nnz_B());
+        nnzC.push_back(Linopy_Storage.at(i).Get_nnz_C());
+        nnzD.push_back(Linopy_Storage.at(i).Get_nnz_D());
+        nnzBL.push_back(Linopy_Storage.at(i).Get_nnz_BL());
+        nnzDL.push_back(Linopy_Storage.at(i).Get_nnz_DL());
+
         A_col.push_back(Linopy_Storage.at(i).Get_A_col());
         A_row.push_back(Linopy_Storage.at(i).Get_A_row());
         A_data.push_back(Linopy_Storage.at(i).Get_A_data());
@@ -319,19 +357,6 @@ int main(int argc, char** argv) {
         ixl.push_back(Linopy_Storage.at(i).Get_lower_inequality_vector_indicator()); //Indikator ...
         xu.push_back(Linopy_Storage.at(i).Get_upper_inequality_vector());
         ixu.push_back(Linopy_Storage.at(i).Get_upper_inequality_vector_indicator()); //Indikator ...
-
-        n.push_back(Linopy_Storage.at(i).Get_n());
-        my.push_back(Linopy_Storage.at(i).Get_my());
-        myl.push_back(Linopy_Storage.at(i).Get_myl());
-        mz.push_back(Linopy_Storage.at(i).Get_mz());
-        mzl.push_back(Linopy_Storage.at(i).Get_mzl());
-
-        nnzA.push_back(Linopy_Storage.at(i).Get_nnz_A());
-        nnzB.push_back(Linopy_Storage.at(i).Get_nnz_B());
-        nnzC.push_back(Linopy_Storage.at(i).Get_nnz_C());
-        nnzD.push_back(Linopy_Storage.at(i).Get_nnz_D());
-        nnzBL.push_back(Linopy_Storage.at(i).Get_nnz_BL());
-        nnzDL.push_back(Linopy_Storage.at(i).Get_nnz_DL());
     }
     
     // set callbacks
