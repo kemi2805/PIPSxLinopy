@@ -6,8 +6,6 @@
 #include "mpi.h"
 
 //added Packages for reading directly from the files
-#include <fstream>
-#include <string>
 #include "LinopyModel.hpp"
 
 extern "C" typedef int (* FNNZ)(void* user_data, int id, int* nnz);
