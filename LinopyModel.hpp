@@ -7,7 +7,7 @@
 #include <memory>
 #include <iostream>
 #include <algorithm>
-
+//#include "../../Core/Interface/PIPSIPMppInterface.hpp"
 
 
 
@@ -88,7 +88,8 @@ private:
 public:
     Linopy(std::string filepath, int local_id, int id_size = 0);
     Linopy();
-    //~Linopy(); Bekomme abgrundtief viele Fehler.
+    /*~Linopy() {
+    }*/
 
     int GetId();
     void SetId(int Id_number);
@@ -164,13 +165,7 @@ public:
     void Transform_Matrix_Cols();
     void Transform_Matrix_Cols_A(std::vector<long long>::iterator Col_begin, std::vector<long long>::iterator Col_end);
     void Transform_Matrix_Cols_B(std::vector<long long>::iterator Col_begin, std::vector<long long>::iterator Col_end);
-
-
-
-
-
-
-
+    //void write_solution(PIPSIPMppInterface& solver_instance, const std::string& file_name) const;
 
 };
 

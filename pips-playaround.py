@@ -30,5 +30,9 @@ Filepath = '/home/ken/Desktop/pypsa_with_PIPS/pypsa-model'
 m.to_block_files(Filepath)
 
 m.solve()
-
-result = subprocess.run(["mpirun","/home/ken/Desktop/PIPS-IPMpp/build/pipsipmLinopyCallbackExample", "-5", str(N), Filepath])
+original_stdout = sys.stdout
+with open('/home/ken/Desktop/pypsa_with_PIPS/pypsa-model/Python_Solution.txt', 'w') as f:
+    sys.stdout = f # Change the standard output to the file we created.
+    print(m.solution.variables)
+    sys.stdout = original_stdout # Reset the standard output to its original value
+result = subprocess.run(["/home/ken/Desktop/PIPS-IPMpp/build/pipsipmLinopyCallbackExample", "Lückenfüller", str(N), Filepath])
