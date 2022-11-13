@@ -165,7 +165,6 @@ public:
     void Transform_Matrix_Cols();
     void Transform_Matrix_Cols_A(std::vector<long long>::iterator Col_begin, std::vector<long long>::iterator Col_end);
     void Transform_Matrix_Cols_B(std::vector<long long>::iterator Col_begin, std::vector<long long>::iterator Col_end);
-    //void write_solution(PIPSIPMppInterface& solver_instance, const std::string& file_name) const;
 
 };
 
