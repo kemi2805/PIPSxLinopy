@@ -551,33 +551,6 @@ void Linopy::Check_Matrix(std::unique_ptr<std::vector<long long>> Row, std::uniq
 }
 
 
-/*void Linopy::write_solution(PIPSIPMppInterface& solver_instance, const std::string& file_name) const {
-
-   if (solver_instance.termination_status() != TerminationStatus::SUCCESSFUL_TERMINATION) {
-
-
-   const double objective = solver_instance.getObjective();
-   auto primalSolVec = solver_instance.gatherPrimalSolution();
-   auto dualSolEqVec = solver_instance.gatherDualSolutionEq();
-   auto dualSolIneqVec = solver_instance.gatherDualSolutionIneq();
-   auto dualSolVarBounds = solver_instance.gatherDualSolutionVarBounds();
-
-    auto eqValues = solver_instance.gatherEqualityConsValues();
-    auto ineqValues = solver_instance.gatherInequalityConsValues();
-
-    if (PIPS_MPIgetRank() == 0) {
-        const int rc = writeSolution(file_name.c_str(), primalSolVec.size(), dualSolEqVec.size(), dualSolIneqVec.size(),
-         objective, primalSolVec.data(), dualSolVarBounds.data(), eqValues.data(), ineqValues.data(), dualSolEqVec.data(),
-        dualSolIneqVec.data(), path_to_gams.c_str());
-
-        if (0 == rc)
-            std::cout << "Solution written to " << file_name << "_sol.gdx\n";
-        else if (-1 == rc)
-            std::cout << "Could not access " << file_name << ".map\n";
-        else
-            std::cout << "Other error writing solution: rc=" << rc << "\n";
-   }
-}*/
 
 /*std::unique_ptr<std::vector<int>> Linopy::Combine_yvec(std::unique_ptr<std::vector<int>>yvec1,std::unique_ptr<std::vector<int>>yvec2){
     if(yvec1 == nullptr  && yvec2 == nullptr)
