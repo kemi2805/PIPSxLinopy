@@ -11,6 +11,7 @@ Linopy::Linopy(std::string filepath, int local_id, int id_size) {
     Set_equality_Vector();
     Set_inequality_Vector();
     Set_Matrix();
+    Check_Matrix_if_empty();
 }
 
 
@@ -92,6 +93,8 @@ std::unique_ptr<std::vector<T>> Linopy::GetDataFromFileEqualityConstraints(std::
     while (getline(File,Fileline)) {
         Temp_Data.push_back(stod(Fileline));
     }
+    if(name == "c" && Fileline.empty())
+        Temp_Data.push_back(0.0);
     File.close();
     return std::move(std::make_unique<std::vector<T>>(Temp_Data));  
 }
@@ -131,8 +134,8 @@ void Linopy::Set_Matrix() {
     return;
 }
 
-std::unique_ptr<std::vector<int>> Linopy::GetDataFromRowFile(std::string name, bool linking) {
-    std::vector<int> Temp_Data;
+std::unique_ptr<std::vector<long long>> Linopy::GetDataFromRowFile(std::string name, bool linking) {
+    std::vector<long long> Temp_Data;
     std::string Fileline;
     std::ifstream File;
     SetPathToFile(id, name);
@@ -141,16 +144,16 @@ std::unique_ptr<std::vector<int>> Linopy::GetDataFromRowFile(std::string name, b
 
     getline(File,Fileline);
     if(!(Fileline.size() != 0))  
-        return std::move(std::make_unique<std::vector<int>>(Temp_Data));
+        return std::move(std::make_unique<std::vector<long long>>(Temp_Data));
     Temp_Data.push_back(stoi(Fileline));
     while (getline(File,Fileline)) 
         Temp_Data.push_back(stoi(Fileline));
     File.close();
-    return std::move(std::make_unique<std::vector<int>>(Temp_Data));
+    return std::move(std::make_unique<std::vector<long long>>(Temp_Data));
 }
 
-std::unique_ptr<std::vector<int>> Linopy::GetDataFromColFile(std::string name, bool linking) {
-    std::vector<int> Temp_Data;
+std::unique_ptr<std::vector<long long>> Linopy::GetDataFromColFile(std::string name, bool linking) {
+    std::vector<long long> Temp_Data;
     std::string Fileline;
     std::ifstream File;
     SetPathToFile(id, name);
@@ -159,7 +162,7 @@ std::unique_ptr<std::vector<int>> Linopy::GetDataFromColFile(std::string name, b
     while (getline(File,Fileline))
         Temp_Data.push_back(stoi(Fileline));
     File.close();
-    return std::move(std::make_unique<std::vector<int>>(Temp_Data));
+    return std::move(std::make_unique<std::vector<long long>>(Temp_Data));
 }
 
 std::unique_ptr<std::vector<double>> Linopy::GetDataFromDataFile(std::string name, bool linking) {
@@ -176,14 +179,18 @@ std::unique_ptr<std::vector<double>> Linopy::GetDataFromDataFile(std::string nam
 }
 
 void Linopy::GetDataForxvec(std::string name, bool linking) { //Schreib das noch zuende. Du willst nur die Abstände wissen.
-    std::vector<int> Temp_Storage;
-    int Temp_Data;
-    int Compare_Data = 0;
+    std::vector<long long> Temp_Storage;
+    long long Temp_Data;
+    long long Compare_Data = 0;
     std::string Fileline;
     std::ifstream File;
     SetPathToFile(id, name);
     File.open(PathToFile);
     getline(File,Fileline);
+    if(Fileline.empty()) {
+         xvec = std::move(std::make_unique<std::vector<long long>>(Temp_Storage));
+         return;
+    }
     Temp_Storage.push_back(stoi(Fileline));
     Compare_Data = Temp_Storage.at(0);
     while (getline(File,Fileline)) {
@@ -198,17 +205,17 @@ void Linopy::GetDataForxvec(std::string name, bool linking) { //Schreib das noch
     }
     File.close();
     Temp_Storage.push_back(Temp_Data);
-    xvec = std::move(std::make_unique<std::vector<int>>(Temp_Storage));
+    xvec = std::move(std::make_unique<std::vector<long long>>(Temp_Storage));
     return; 
 }
 
 
-void Linopy::Set_xvec_A(int* xvec_A0, int size) {
-    std::vector<int> Temp_Data;
-    for(int i=0; i < size ;i++) { // Setzt den Pointer von xvec_A von egal welchen Block, auf den von Block 0
+void Linopy::Set_xvec_A(long long* xvec_A0, long long size) {
+    std::vector<long long> Temp_Data;
+    for(long long i=0; i < size ;i++) { // Setzt den Pointer von xvec_A von egal welchen Block, auf den von Block 0
         Temp_Data.push_back(*(xvec_A0+i));
     }
-    xvec_A = std::move(std::make_unique<std::vector<int>>(Temp_Data));
+    xvec_A = std::move(std::make_unique<std::vector<long long>>(Temp_Data));
     return;
 }
 
@@ -223,54 +230,54 @@ void Linopy::SetId(int Id_number) {
     id = Id_number;
 }
 
-int Linopy::Get_n() const {
+long long Linopy::Get_n() const {
     return c->size();
 }
 
-int Linopy::Get_my() const {
+long long Linopy::Get_my() const {
     return b->size();
 }
 
-int Linopy::Get_mz() const {
+long long Linopy::Get_mz() const {
     return dl->size();
 }
 
-int Linopy::Get_myl() const {
+long long Linopy::Get_myl() const {
     return bl->size();
 }
 
-int Linopy::Get_mzl() const {
+long long Linopy::Get_mzl() const {
     return dll->size();
 }
 
-int Linopy::Get_nnz_A() const {
+long long Linopy::Get_nnz_A() const {
     return A_data->size();
 }
 
-int Linopy::Get_nnz_B() const {
+long long Linopy::Get_nnz_B() const {
     return B_data->size();
 }
 
-int Linopy::Get_nnz_BL() const {
+long long Linopy::Get_nnz_BL() const {
     return BL_data->size();
 }
 
-int Linopy::Get_nnz_C() const {
+long long Linopy::Get_nnz_C() const {
     return C_data->size();
 }
 
-int Linopy::Get_nnz_D() const {
+long long Linopy::Get_nnz_D() const {
     return D_data->size();
 }
 
-int Linopy::Get_nnz_DL() const {
+long long Linopy::Get_nnz_DL() const {
     return DL_data->size();
 }
 
-int* Linopy::Get_xvec_A() {
+long long* Linopy::Get_xvec_A() {
     return xvec->data();
 }
-int Linopy::Get_xvec_A_size() {
+long long Linopy::Get_xvec_A_size() {
     return xvec->size();
 }
 
@@ -326,60 +333,60 @@ std::unique_ptr<std::vector<double>> Linopy::Get_lower_inequality_vector_indicat
     return std::move(ixl);
 }
 
-std::unique_ptr<std::vector<int>> Linopy::Get_A_row() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_A_row() {
     return std::move(A_row);
 }
-std::unique_ptr<std::vector<int>> Linopy::Get_A_col() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_A_col() {
     return std::move(A_col);
 }
 std::unique_ptr<std::vector<double>> Linopy::Get_A_data() {
     return std::move(A_data);
 }
 
-std::unique_ptr<std::vector<int>> Linopy::Get_B_row() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_B_row() {
     return std::move(B_row);
 }
-std::unique_ptr<std::vector<int>> Linopy::Get_B_col() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_B_col() {
     return std::move(B_col);
 }
 std::unique_ptr<std::vector<double>> Linopy::Get_B_data() {
     return std::move(B_data);
 }
 
-std::unique_ptr<std::vector<int>> Linopy::Get_BL_row() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_BL_row() {
     return std::move(BL_row);
 }
-std::unique_ptr<std::vector<int>> Linopy::Get_BL_col() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_BL_col() {
     return std::move(BL_col);
 }
 std::unique_ptr<std::vector<double>> Linopy::Get_BL_data() {
     return std::move(BL_data);
 }
 
-std::unique_ptr<std::vector<int>> Linopy::Get_C_row() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_C_row() {
     return std::move(C_row);
 }
-std::unique_ptr<std::vector<int>> Linopy::Get_C_col() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_C_col() {
     return std::move(C_col);
 }
 std::unique_ptr<std::vector<double>> Linopy::Get_C_data() {
     return std::move(C_data);
 }
 
-std::unique_ptr<std::vector<int>> Linopy::Get_D_row() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_D_row() {
     return std::move(D_row);
 }
-std::unique_ptr<std::vector<int>> Linopy::Get_D_col() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_D_col() {
     return std::move(D_col);
 }
 std::unique_ptr<std::vector<double>> Linopy::Get_D_data() {
     return std::move(D_data);
 }
 
-std::unique_ptr<std::vector<int>> Linopy::Get_DL_row() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_DL_row() {
     return std::move(DL_row);
 }
-std::unique_ptr<std::vector<int>> Linopy::Get_DL_col() {
+std::unique_ptr<std::vector<long long>> Linopy::Get_DL_col() {
     return std::move(DL_col);
 }
 std::unique_ptr<std::vector<double>> Linopy::Get_DL_data() {
@@ -387,11 +394,11 @@ std::unique_ptr<std::vector<double>> Linopy::Get_DL_data() {
 }
 
 void Linopy::Transform_Matrix_Cols() {
-    if (xvec_A!= nullptr) {
+    if (xvec_A != nullptr || id==0) {
         Transform_Matrix_Cols_A(A_col->begin(), A_col->end());
         Transform_Matrix_Cols_A(C_col->begin(), C_col->end());
     }
-    if (xvec_A != nullptr) {
+    if (xvec != nullptr) {
         Transform_Matrix_Cols_B(B_col->begin(), B_col->end());
         Transform_Matrix_Cols_B(BL_col->begin(), BL_col->end());
         Transform_Matrix_Cols_B(D_col->begin(), D_col->end());
@@ -401,13 +408,13 @@ void Linopy::Transform_Matrix_Cols() {
 
 }
 
-void Linopy::Transform_Matrix_Cols_A(std::vector<int>::iterator Col_begin, std::vector<int>::iterator Col_end) {
+void Linopy::Transform_Matrix_Cols_A(std::vector<long long>::iterator Col_begin, std::vector<long long>::iterator Col_end) {
     int counter = 0;
     for(auto line = Col_begin; line != Col_end; line++) {
-        for(auto it = xvec_A->begin(); it != xvec_A->end(); it++) {
+        for(std::vector<long long>::iterator it = xvec_A->begin(); it <= xvec_A->end(); it++) {
             it++;
             if((*line <= *it) && (*line >= *(it-1))) {
-                for(int i = counter; i!=-1;i--) {
+                for(int i = counter; i!=-1; i--) {
                     if(!(i%2))
                         *line -= xvec_A->at(i);
                     else
@@ -416,13 +423,18 @@ void Linopy::Transform_Matrix_Cols_A(std::vector<int>::iterator Col_begin, std::
                 *line += counter/2;
                 break;
             }
+            else if(it == xvec_A->end()-1) { // Weil wir in Python 0er dazufügen
+                *line = 0;
+                counter = 0;
+                break;
+            }
             counter += 2; 
         }
         counter = 0;
     }
 }
 
-void Linopy::Transform_Matrix_Cols_B(std::vector<int>::iterator Col_begin, std::vector<int>::iterator Col_end) {
+void Linopy::Transform_Matrix_Cols_B(std::vector<long long>::iterator Col_begin, std::vector<long long>::iterator Col_end) {
     int counter = 0;
     for(auto line = Col_begin; line != Col_end; line++) {
         for(auto it = xvec->begin(); it != xvec->end(); it++) {
@@ -437,21 +449,26 @@ void Linopy::Transform_Matrix_Cols_B(std::vector<int>::iterator Col_begin, std::
                 *line += counter/2;
                 break;
             }
+            else if(it == xvec->end()-1) { // Weil wir in Python 0er dazufügen
+                *line = 0;
+                counter = 0;
+                break;
+            }
             counter += 2; 
         }
         counter = 0;
     }
 }
 
-std::unique_ptr<std::vector<int>> Linopy::Transform_Matrix_Rows(std::unique_ptr<std::vector<int>> M_Row) {
-    std::vector<int> Temp_Data;
-    int temp = 0;
+std::unique_ptr<std::vector<long long>> Linopy::Transform_Matrix_Rows(std::unique_ptr<std::vector<long long>> M_Row) {
+    std::vector<long long> Temp_Data;
+    long long temp = 0;
     Temp_Data.push_back(temp);
     if(M_Row->empty()) {
         Temp_Data.push_back(0);
-        return std::move(std::make_unique<std::vector<int>>(Temp_Data));
+        return std::move(std::make_unique<std::vector<long long>>(Temp_Data));
     }
-    for(std::vector<int>::iterator it = M_Row->begin() + 1; it != M_Row->end(); it++) {
+    for(std::vector<long long>::iterator it = M_Row->begin() + 1; it != M_Row->end(); it++) {
         if(*(it-1) != *it) {
             temp++;
             Temp_Data.push_back(temp);
@@ -461,7 +478,75 @@ std::unique_ptr<std::vector<int>> Linopy::Transform_Matrix_Rows(std::unique_ptr<
     }
     temp++;
     Temp_Data.push_back(temp);
-    return std::move(std::make_unique<std::vector<int>>(Temp_Data));
+    return std::move(std::make_unique<std::vector<long long>>(Temp_Data));
+}
+
+
+void Linopy::Check_Matrix_if_empty() {
+    for(auto it = A_data->begin(); it != A_data->end(); it++) {
+        if(*it != 0.0)
+            break;
+        else if(it+1 == A_data->end()) {
+            A_row->clear();
+            A_data->clear();
+            A_col->clear();
+        }
+    }
+        for(auto it = B_data->begin(); it != B_data->end(); it++) {
+        if(*it != 0.0) 
+            break;
+        else if(it+1 == B_data->end()) {
+            B_row->clear();
+            B_data->clear();
+            B_col->clear();
+        }
+    }
+    for(auto it = BL_data->begin(); it != BL_data->end(); it++) {
+        if(*it != 0.0) 
+            break;
+        else if(it+1 == BL_data->end()) {
+            BL_row->clear();
+            BL_data->clear();
+            BL_col->clear();
+        }
+    }
+    for(auto it = C_data->begin(); it != C_data->end(); it++) {
+        if(*it != 0.0) {
+            break;}
+        else if(it+1 == C_data->end()) {
+            C_row->clear();
+            C_data->clear();
+            C_col->clear();
+        }
+    }
+    for(auto it = D_data->begin(); it != D_data->end(); it++) {
+        if(*it != 0.0) 
+            break;
+        else if(it+1 == D_data->end()) {
+            D_row->clear();
+            D_data->clear();
+            D_col->clear();
+        }
+    }
+    for(auto it = DL_data->begin(); it != DL_data->end(); it++) {
+        if(*it!=0.0) 
+            break;
+        else if(it+1 == DL_data->end()) {
+            DL_row->clear();
+            DL_data->clear();
+            DL_col->clear();
+        }
+    }
+}
+
+void Linopy::Check_Matrix(std::unique_ptr<std::vector<long long>> Row, std::unique_ptr<std::vector<long long>> Col, std::unique_ptr<std::vector<double>> Data) {
+    for(auto it = Data->begin(); it != Data->end(); it++) {
+        if(*it!=0.0) 
+            break;
+        else if(it+1 == Data->end()) {
+            
+        }
+    }
 }
 
 
