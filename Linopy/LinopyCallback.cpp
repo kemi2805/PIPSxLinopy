@@ -285,9 +285,9 @@ int main(int argc, char** argv) {
    
     // This has to be the same number as the number of Blocks you put in Linopy.
     // Linopy gives an extra block out. Substract 1 from it.
-    std::string nScenariostring = argv[2];
+    std::string nScenariostring = argv[1];
     int nScenarios = stoi(nScenariostring); //Argument aus der Main-Funktion
-    std::string Filepath = argv[3];
+    std::string Filepath = argv[2];
     std::cout << "nScenario = " << nScenarios << std::endl;
     std::cout << "Filepath = " << Filepath << std::endl;
 
